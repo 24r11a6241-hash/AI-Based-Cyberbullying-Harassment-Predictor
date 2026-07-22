@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — CyberGuard AI{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <div>
+    <h2 class="mb-0">Dashboard</h2>
+    <p class="text-secondary mb-0">Welcome, {{ user.username }}</p>
+  </div>
+  <a href="{{ url_for('pages.predict_page') }}" class="btn btn-primary"><i class="bi bi-search me-1"></i>New Prediction</a>
+</div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-4">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-secondary small">Your Predictions</div>
+        <div class="display-6 fw-bold">{{ user_stats.my_predictions }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-secondary small">Platform Total</div>
+        <div class="display-6 fw-bold">{{ stats.total_predictions }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-secondary small">Harmful Rate</div>
+        <div class="display-6 fw-bold">{{ (stats.harmful_rate * 100)|round(1) }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white">
+    <h5 class="mb-0">Predictions by Category (Platform)</h5>
+  </div>
+  <div class="card-body">
+    {% if stats.predictions_by_label %}
+    <div class="table-responsive">
+      <table class="table table-sm align-middle mb-0">
+        <thead><tr><th>Category</th><th>Count</th></tr></thead>
+        <tbody>
+          {% for label, count in stats.predictions_by_label.items() %}
+          <tr><td>{{ label }}</td><td>{{ count }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-secondary mb-0">No predictions yet. Run your first analysis.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

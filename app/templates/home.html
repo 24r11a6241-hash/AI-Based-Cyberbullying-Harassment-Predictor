@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Home — CyberGuard AI{% endblock %}
+{% block content %}
+<section class="hero text-center text-lg-start mb-5">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7">
+      <span class="badge rounded-pill text-bg-primary mb-3">AI-Powered Safety</span>
+      <h1 class="display-5 fw-bold mb-3">Detect cyberbullying and online harassment in real time</h1>
+      <p class="lead text-secondary mb-4">
+        CyberGuard AI classifies user text into Normal, Offensive, Toxic, Cyberbullying,
+        Hate Speech, Threat, Identity Attack, and Sexual Harassment — with confidence scores,
+        severity levels, sentiment, and highlighted toxic keywords.
+      </p>
+      <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-lg-start">
+        <a href="{{ url_for('pages.register') }}" class="btn btn-primary btn-lg">Get Started</a>
+        <a href="{{ url_for('pages.login') }}" class="btn btn-outline-secondary btn-lg">Sign In</a>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card shadow border-0 hero-card">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-3"><i class="bi bi-cpu me-2"></i>Pipeline</h5>
+          <ul class="list-unstyled mb-0 feature-list">
+            <li>NLP preprocessing (tokenization, lemmatization, stopwords)</li>
+            <li>TF-IDF + Logistic Regression (Jigsaw-trained)</li>
+            <li>JWT auth, MongoDB history, admin analytics</li>
+            <li>REST APIs &amp; production Docker/Kubernetes deploy</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="row g-4 mb-5">
+  {% for label, icon, desc in [
+    ('Normal', 'emoji-smile', 'Benign, non-harmful content'),
+    ('Toxic / Offensive', 'emoji-angry', 'Insults and general toxicity'),
+    ('Cyberbullying', 'people', 'Targeted peer harassment patterns'),
+    ('Threats & Hate', 'exclamation-triangle', 'Violence, identity attacks, hate speech'),
+  ] %}
+  <div class="col-md-6 col-xl-3">
+    <div class="card h-100 border-0 shadow-sm">
+      <div class="card-body">
+        <i class="bi bi-{{ icon }} fs-3 text-primary mb-2 d-block"></i>
+        <h5 class="card-title">{{ label }}</h5>
+        <p class="card-text text-secondary small mb-0">{{ desc }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Admin — CyberGuard AI{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <h2 class="mb-0">Admin Panel</h2>
+  <div class="d-flex gap-2">
+    <span class="badge {{ 'text-bg-success' if model_loaded else 'text-bg-danger' }} align-self-center">
+      Model {{ 'loaded' if model_loaded else 'not loaded' }}
+    </span>
+    <button class="btn btn-warning btn-sm" id="retrainBtn">Retrain Model</button>
+  </div>
+</div>
+<div id="adminAlert" class="alert d-none"></div>
+
+<div class="row g-4 mb-4">
+  <div class="col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="small text-secondary">Users</div><div class="h3 mb-0">{{ stats.total_users }}</div></div></div></div>
+  <div class="col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="small text-secondary">Predictions</div><div class="h3 mb-0">{{ stats.total_predictions }}</div></div></div></div>
+  <div class="col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="small text-secondary">Harmful</div><div class="h3 mb-0">{{ stats.harmful_predictions }}</div></div></div></div>
+  <div class="col-md-3"><div class="card stat-card border-0 shadow-sm"><div class="card-body"><div class="small text-secondary">Last 7 days</div><div class="h3 mb-0">{{ stats.predictions_last_7_days }}</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white"><h5 class="mb-0">Recent Predictions</h5></div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>User</th><th>Label</th><th>Severity</th><th>When</th></tr></thead>
+            <tbody>
+              {% for r in recent %}
+              <tr>
+                <td class="small">{{ r.user_email }}</td>
+                <td>{{ r.primary_label }}</td>
+                <td>{{ r.severity }}</td>
+                <td class="small">{{ r.created_at[:19] if r.created_at else '—' }}</td>
+              </tr>
+              {% else %}
+              <tr><td colspan="4" class="text-secondary p-3">No data</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white"><h5 class="mb-0">Top Toxic Keywords</h5></div>
+      <ul class="list-group list-group-flush">
+        {% for k in keywords %}
+        <li class="list-group-item d-flex justify-content-between"><span>{{ k.keyword }}</span><span class="badge text-bg-secondary">{{ k.count }}</span></li>
+        {% else %}
+        <li class="list-group-item text-secondary">No keywords yet</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% if metrics %}
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white"><h5 class="mb-0">Model Metrics</h5></div>
+      <div class="card-body small">
+        <div>Accuracy: {{ (metrics.accuracy * 100)|round(2) }}%</div>
+        <div>Precision: {{ (metrics.precision_macro * 100)|round(2) }}%</div>
+        <div>Recall: {{ (metrics.recall_macro * 100)|round(2) }}%</div>
+        <div>F1: {{ (metrics.f1_macro * 100)|round(2) }}%</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.getElementById('retrainBtn').addEventListener('click', async () => {
+  const alertEl = document.getElementById('adminAlert');
+  alertEl.className = 'alert alert-info';
+  alertEl.textContent = 'Training in progress…';
+  alertEl.classList.remove('d-none');
+  try {
+    const res = await authFetch('/api/v1/admin/model/retrain', { method: 'POST', body: JSON.stringify({}) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Retrain failed');
+    alertEl.className = 'alert alert-success';
+    alertEl.textContent = `Retrain complete. Accuracy: ${(data.metrics.accuracy * 100).toFixed(1)}%`;
+    setTimeout(() => location.reload(), 1500);
+  } catch (err) {
+    alertEl.className = 'alert alert-danger';
+    alertEl.textContent = err.message;
+  }
+});
+</script>
+{% endblock %}

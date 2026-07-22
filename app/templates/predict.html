@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Predict — CyberGuard AI{% endblock %}
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="h4 mb-3">Analyze Text</h2>
+        <div id="predictAlert" class="alert alert-danger d-none"></div>
+        <form id="predictForm">
+          <div class="mb-3">
+            <label for="inputText" class="form-label">Enter comment or message</label>
+            <textarea id="inputText" class="form-control" rows="8" maxlength="5000" placeholder="Type or paste text to analyze..." required></textarea>
+            <div class="form-text"><span id="charCount">0</span> / 5000 characters</div>
+          </div>
+          <button type="submit" class="btn btn-primary" id="predictBtn">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="predictSpinner"></span>
+            Analyze
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card border-0 shadow-sm result-card d-none" id="resultCard">
+      <div class="card-body p-4">
+        <h2 class="h4 mb-3">Results</h2>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span class="badge text-bg-primary fs-6" id="resultLabel">—</span>
+          <span class="badge text-bg-secondary" id="resultConfidence">—</span>
+          <span class="badge" id="resultSeverity">—</span>
+          <span class="badge text-bg-info text-dark" id="resultSentiment">—</span>
+        </div>
+        <h6>Highlighted text</h6>
+        <div class="p-3 bg-light rounded mb-3 result-highlight" id="resultHighlighted"></div>
+        <h6>Toxic keywords</h6>
+        <div id="resultKeywords" class="mb-3"></div>
+        <h6>All category scores</h6>
+        <div id="resultScores"></div>
+      </div>
+    </div>
+    <div class="card border-0 shadow-sm" id="resultPlaceholder">
+      <div class="card-body p-4 text-secondary">
+        Submit text to see classification, confidence, severity, sentiment, and keyword highlights.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+const textarea = document.getElementById('inputText');
+const charCount = document.getElementById('charCount');
+textarea.addEventListener('input', () => { charCount.textContent = textarea.value.length; });
+
+const severityClass = { Low: 'text-bg-success', Medium: 'text-bg-warning', High: 'text-bg-danger', Critical: 'text-bg-dark' };
+
+document.getElementById('predictForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertEl = document.getElementById('predictAlert');
+  const spinner = document.getElementById('predictSpinner');
+  alertEl.classList.add('d-none');
+  spinner.classList.remove('d-none');
+  try {
+    const res = await authFetch('/api/v1/predict', {
+      method: 'POST',
+      body: JSON.stringify({ text: textarea.value.trim() }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Prediction failed');
+    document.getElementById('resultPlaceholder').classList.add('d-none');
+    document.getElementById('resultCard').classList.remove('d-none');
+    document.getElementById('resultLabel').textContent = data.primary_label;
+    document.getElementById('resultConfidence').textContent = `${data.confidence_percent}% confidence`;
+    const sev = document.getElementById('resultSeverity');
+    sev.textContent = `Severity: ${data.severity}`;
+    sev.className = 'badge ' + (severityClass[data.severity] || 'text-bg-secondary');
+    document.getElementById('resultSentiment').textContent = `Sentiment: ${data.sentiment}`;
+    document.getElementById('resultHighlighted').innerHTML = data.highlighted_text || textarea.value;
+    const kwEl = document.getElementById('resultKeywords');
+    kwEl.innerHTML = (data.toxic_keywords || []).map(k => `<span class="badge text-bg-danger me-1">${k}</span>`).join('') || '<span class="text-secondary">None detected</span>';
+    const scoresEl = document.getElementById('resultScores');
+    scoresEl.innerHTML = Object.entries(data.all_scores || {}).map(([k,v]) => {
+      const pct = Math.round(v * 100);
+      return `<div class="mb-2"><div class="d-flex justify-content-between small"><span>${k}</span><span>${pct}%</span></div><div class="progress" style="height:8px"><div class="progress-bar" style="width:${pct}%"></div></div></div>`;
+    }).join('');
+  } catch (err) {
+    alertEl.textContent = err.message;
+    alertEl.classList.remove('d-none');
+  } finally {
+    spinner.classList.add('d-none');
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+:root {
+  --cg-primary: #0d6efd;
+  --cg-dark: #1a1d21;
+}
+
+html, body {
+  height: 100%;
+}
+
+.app-body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+}
+
+main {
+  flex: 1;
+}
+
+.hero-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+}
+
+.feature-list li {
+  padding: 0.35rem 0;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.feature-list li:last-child {
+  border-bottom: none;
+}
+
+.stat-card .display-6,
+.stat-card .h3 {
+  color: var(--cg-dark);
+}
+
+.toxic-highlight {
+  background: #ffe066;
+  padding: 0 0.15rem;
+  border-radius: 0.2rem;
+}
+
+.result-highlight {
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.result-card {
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.footer {
+  margin-top: auto;
+}
+
+@media (max-width: 576px) {
+  .display-5 {
+    font-size: 2rem;
+  }
+}

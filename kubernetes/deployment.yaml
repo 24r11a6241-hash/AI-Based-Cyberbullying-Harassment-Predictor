@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyberguard-config
+data:
+  FLASK_ENV: "production"
+  MONGO_URI: "mongodb://mongo-service:27017/cyberbullying_predictor"
+  LOG_LEVEL: "INFO"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyberguard-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cyberguard-web
+  template:
+    metadata:
+      labels:
+        app: cyberguard-web
+    spec:
+      containers:
+        - name: web
+          image: cyberguard-ai:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: cyberguard-config
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cyberguard-secrets
+                  key: SECRET_KEY
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cyberguard-secrets
+                  key: JWT_SECRET_KEY
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 5000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyberguard-web-service
+spec:
+  selector:
+    app: cyberguard-web
+  ports:
+    - port: 80
+      targetPort: 5000
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:7
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-storage
+              mountPath: /data/db
+      volumes:
+        - name: mongo-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Reports — CyberGuard AI{% endblock %}
+{% block content %}
+<h2 class="mb-4">Model Evaluation Reports</h2>
+{% if metrics %}
+<div class="row g-4 mb-4">
+  <div class="col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">Accuracy</div><div class="h3">{{ (metrics.accuracy * 100)|round(2) }}%</div></div></div></div>
+  <div class="col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">Precision (macro)</div><div class="h3">{{ (metrics.precision_macro * 100)|round(2) }}%</div></div></div></div>
+  <div class="col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">Recall (macro)</div><div class="h3">{{ (metrics.recall_macro * 100)|round(2) }}%</div></div></div></div>
+  <div class="col-md-3"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-secondary small">F1-Score (macro)</div><div class="h3">{{ (metrics.f1_macro * 100)|round(2) }}%</div></div></div></div>
+</div>
+
+{% if cm_exists %}
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-header bg-white"><h5 class="mb-0">Confusion Matrix</h5></div>
+  <div class="card-body text-center">
+    <img src="{{ url_for('pages.confusion_matrix_image') }}" alt="Confusion Matrix" class="img-fluid rounded">
+  </div>
+</div>
+{% endif %}
+
+<div class="card border-0 shadow-sm">
+  <div class="card-header bg-white"><h5 class="mb-0">Classification Report (JSON)</h5></div>
+  <div class="card-body">
+    <pre class="small bg-light p-3 rounded mb-0"><code>{{ metrics.classification_report | tojson(indent=2) }}</code></pre>
+  </div>
+</div>
+{% else %}
+<div class="alert alert-warning">No training metrics available. Run <code>python -m ml.train</code> or retrain from the Admin panel.</div>
+{% endif %}
+{% endblock %}

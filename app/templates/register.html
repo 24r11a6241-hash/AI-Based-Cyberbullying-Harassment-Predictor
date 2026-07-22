@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Register — CyberGuard AI{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-5">
+    <div class="card shadow border-0">
+      <div class="card-body p-4 p-lg-5">
+        <h2 class="mb-1">Create account</h2>
+        <p class="text-secondary mb-4">Register to save prediction history securely.</p>
+        <div id="registerAlert" class="alert alert-danger d-none" role="alert"></div>
+        <form id="registerForm" novalidate>
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" required minlength="3">
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" required autocomplete="email">
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" required minlength="8">
+            <div class="form-text">At least 8 characters with letters and numbers.</div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Register</button>
+        </form>
+        <p class="mt-3 mb-0 text-center small">Already have an account? <a href="{{ url_for('pages.login') }}">Login</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const alertEl = document.getElementById('registerAlert');
+  alertEl.classList.add('d-none');
+  const username = document.getElementById('username').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  try {
+    const res = await fetch('/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Registration failed');
+    localStorage.setItem('access_token', data.token);
+    window.location.href = '/dashboard';
+  } catch (err) {
+    alertEl.textContent = err.message;
+    alertEl.classList.remove('d-none');
+  }
+});
+</script>
+{% endblock %}

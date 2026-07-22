@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  web:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      MONGO_URI: mongodb://mongo:27017/cyberbullying_predictor
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-change-me-jwt-in-production}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@12345}
+    depends_on:
+      - mongo
+    volumes:
+      - ./saved_models:/app/saved_models
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+
+volumes:
+  mongo_data:
