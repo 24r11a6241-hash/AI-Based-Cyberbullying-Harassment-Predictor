@@ -97,6 +97,23 @@ See [docs/API.md](docs/API.md)
 ```bash
 pytest tests/ -q
 ```
+### Uses of AI-Based Cyberbullying & Harassment Predictor
+Detects cyberbullying, hate speech, and abusive language in online conversations.
+Helps social media platforms automatically moderate harmful content.
+Protects users from online harassment and toxic communication.
+Assists schools and universities in monitoring cyberbullying among students.
+Improves safety in online gaming communities and chat platforms.
+Supports messaging applications by filtering offensive messages.
+Helps organizations monitor workplace communication for harassment.
+Provides real-time content analysis using AI and NLP techniques.
+Reduces the manual effort required for content moderation.
+Generates confidence scores and severity levels for detected content.
+Stores prediction history for analysis and reporting.
+Supports researchers in studying online behavior and abusive language trends.
+Can be integrated into websites, mobile applications, and social media platforms through APIs.
+Enhances digital safety by identifying harmful content before it spreads.
+Demonstrates practical applications of Artificial Intelligence, Machine Learning, and Natural Language Processing in cybersecurity.
+
 
 ## Security Notes
 
